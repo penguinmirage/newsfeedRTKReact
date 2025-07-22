@@ -1,7 +1,10 @@
 import React, { useEffect, useCallback, useState } from "react";
+import { Typography, Spin, Skeleton, Space } from "antd";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchPosts } from "../store/postsSlice";
 import NewsCard from "./NewsCard";
+
+const { Title } = Typography;
 
 const NewsList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -9,6 +12,7 @@ const NewsList: React.FC = () => {
     (state: any) => state.posts,
   );
   const [loadingMore, setLoadingMore] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const loadPosts = useCallback(async () => {
     if (hasMore && !loading && !loadingMore) {
@@ -22,7 +26,10 @@ const NewsList: React.FC = () => {
 
   useEffect(() => {
     if (posts.length === 0) {
-      dispatch(fetchPosts(0));
+      setTimeout(async () => {
+        await dispatch(fetchPosts(0));
+        setInitialLoading(false);
+      }, 1500);
     }
   }, [dispatch, posts.length]);
 
@@ -63,41 +70,69 @@ const NewsList: React.FC = () => {
 
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center", color: "#000", marginBottom: "30px" }}>
+      <Title
+        level={1}
+        style={{ textAlign: "center", color: "#000", marginBottom: "30px" }}
+      >
         News Feed
-      </h1>
+      </Title>
 
-      {posts.map((post: any) => (
-        <NewsCard key={post.id} post={post} />
-      ))}
+      {initialLoading ? (
+        <Space direction="vertical" style={{ width: "100%" }}>
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div
+              key={index}
+              style={{
+                border: "1px solid #000",
+                padding: "16px",
+                marginBottom: "16px",
+                backgroundColor: "#fff",
+              }}
+            >
+              <Skeleton active />
+            </div>
+          ))}
+        </Space>
+      ) : (
+        <>
+          {posts.map((post: any) => (
+            <NewsCard key={post.id} post={post} />
+          ))}
 
-      {(loading || loadingMore) && (
-        <div style={{ textAlign: "center", padding: "20px", color: "#000" }}>
-          Loading...
-        </div>
-      )}
+          {loadingMore && (
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <Spin size="large" />
+              <div style={{ marginTop: "8px", color: "#000" }}>
+                Loading more news...
+              </div>
+            </div>
+          )}
 
-      {!hasMore && posts.length > 0 && (
-        <div style={{ textAlign: "center", color: "#000", padding: "20px" }}>
-          All news loaded
-        </div>
-      )}
+          {!hasMore && posts.length > 0 && (
+            <div
+              style={{ textAlign: "center", color: "#000", padding: "20px" }}
+            >
+              All news loaded
+            </div>
+          )}
 
-      {hasMore && posts.length > 0 && !loading && !loadingMore && (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <button
-            onClick={loadPosts}
-            style={{
-              padding: "10px 20px",
-              border: "1px solid #000",
-              backgroundColor: "#fff",
-              color: "#000",
-              cursor: "pointer",
-            }}
-          >
-            Load More
-          </button>
-        </div>
+          {hasMore && posts.length > 0 && !loading && !loadingMore && (
+            <div style={{ textAlign: "center", padding: "20px" }}>
+              <button
+                onClick={loadPosts}
+                style={{
+                  padding: "10px 20px",
+                  border: "1px solid #000",
+                  backgroundColor: "#fff",
+                  color: "#000",
+                  cursor: "pointer",
+                }}
+              >
+                Load More
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
