@@ -1,1 +1,2 @@
-Deploy: Vercel: newssite-ashy.vercel.app
+Vercel: [newssite-ashy.vercel.app
+](https://newssite-ashy.vercel.app/)
