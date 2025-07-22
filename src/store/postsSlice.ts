@@ -38,29 +38,15 @@ const initialState: PostsState = {
 
 export const fetchPosts = createAsyncThunk(
   "posts/fetchPosts",
-  async (skip: number = 0, { rejectWithValue }) => {
-    try {
-      const response = await fetch(
-        `https://dummyjson.com/posts?limit=10&skip=${skip}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: PostsResponse = await response.json();
-      return data;
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch posts",
-      );
+  async (skip: number = 0) => {
+    const response = await fetch(
+      `https://dummyjson.com/posts?limit=10&skip=${skip}`,
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch posts");
     }
+    const data: PostsResponse = await response.json();
+    return data;
   },
 );
 
